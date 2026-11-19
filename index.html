@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>ASL Brain</title>
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;padding:48px 16px;color:#1f2937;background:#f8fafc}
+  main{max-width:520px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 12px}
+  p{line-height:1.6;margin:8px 0}
+  .err{color:#b91c1c}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="t">正在返回 ASL Brain…</h1>
+  <p id="m">Returning to ASL Brain…</p>
+</main>
+<script>
+// Google 授權完成後先跳到這裡(Google 不接受內網 IP 當回調地址),
+// 再按 state 裡帶的來源地址把瀏覽器送回公司內網的 Brain。只放行內網 / 本機地址。
+(function () {
+  var t = document.getElementById("t"), m = document.getElementById("m");
+  function fail(zh, en) { t.textContent = "無法返回 ASL Brain"; m.className = "err"; m.textContent = zh + " / " + en; }
+  var q = new URLSearchParams(location.search), st = q.get("state") || "", i = st.indexOf(".");
+  if (i < 0) { fail("鏈接不完整,請回到 Brain 重新點「登入授權」", "Incomplete link. Click Sign in again in Brain."); return; }
+  var b = st.slice(i + 1).replace(/-/g, "+").replace(/_/g, "/");
+  while (b.length % 4) b += "=";
+  var o;
+  try { o = new URL(atob(b)); } catch (e) { fail("來源地址無效", "Invalid return address."); return; }
+  var h = o.hostname;
+  var inside = /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(h)
+            || h === "localhost" || /\.(local|lan|internal|home\.arpa)$/.test(h);
+  if (!/^https?:$/.test(o.protocol) || o.pathname !== "/" || !inside) {
+    fail("只能返回公司內網的 Brain", "Only an internal Brain address is allowed."); return;
+  }
+  location.replace(o.origin + "/api/connectors/oauth/callback" + location.search);
+})();
+</script>
+</body>
+</html>
